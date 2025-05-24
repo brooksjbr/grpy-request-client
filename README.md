@@ -54,7 +54,7 @@ To run the test suite:
 pytest
 
 # Run with coverage report
-pytest --cov=src/grpy_rest_client
+pytest --cov=src/grpy_request_client
 ```
 
 ### Code Style
