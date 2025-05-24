@@ -2,7 +2,24 @@
 
 
 
+## v0.3.0 (2025-05-24)
+
+### Feature
+
+* feat: request handler ([`cfa8290`](https://github.com/brooksjbr/grpy-request-client/commit/cfa8290dec25390e3140a9374a14256d2d88ff86))
+
+### Unknown
+
+* Merge pull request #5 from brooksjbr/feat-request-handler
+
+feat: request handler ([`4229f88`](https://github.com/brooksjbr/grpy-request-client/commit/4229f88e4d3a9552a43eb9206f5051557a18006b))
+
+
 ## v0.2.0 (2025-05-24)
+
+### Chore
+
+* chore(release): 0.2.0 [skip ci] ([`6804d92`](https://github.com/brooksjbr/grpy-request-client/commit/6804d92f17ae8a2e335d02e12cd0457ae2f42b7f))
 
 ### Documentation
 
