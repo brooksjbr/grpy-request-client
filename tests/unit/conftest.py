@@ -1,7 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
-from aiohttp import ClientSession
+from aiohttp import ClientResponse, ClientSession
 
 from src.grpy.models.request_model import RequestModel
 
@@ -76,3 +76,38 @@ def mock_session_factory(mock_client_response):
         return session, mock_response
 
     return _create_session
+
+
+@pytest.fixture
+def mock_client_response():
+    """
+    Fixture that provides a configurable mock ClientResponse.
+
+    Returns a factory function that creates mock responses with specified attributes.
+    """
+
+    def _create_response(
+        status=200, reason="OK", headers=None, request_info=None, history=None, content=None
+    ):
+        mock_response = Mock(spec=ClientResponse)
+        mock_response.status = status
+        mock_response.reason = reason
+        mock_response.headers = headers or {}
+        mock_response.request_info = request_info or Mock()
+        mock_response.history = history or []
+
+        # For content handling
+        if content is not None:
+
+            async def mock_text():
+                return content if isinstance(content, str) else str(content)
+
+            async def mock_json():
+                return content if not isinstance(content, str) else None
+
+            mock_response.text = mock_text
+            mock_response.json = mock_json
+
+        return mock_response
+
+    return _create_response
