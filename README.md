@@ -8,13 +8,15 @@ A Python package for making asynchronous HTTP requests.
 ## Features
 
 -   **Async-First Design**: Built on aiohttp for efficient asynchronous requests, optimized for high-throughput microservices
--   **Robust Error Handling**:
-    -   Comprehensive exception handling with detailed logging
-    -   Status code management
-    -   Context-aware error reporting
--   **Resource Management**:
-    -   Proper session lifecycle management with AsyncExitStack
-    -   Automatic cleanup of resources
+
+-   **Type Safety**: Built with Pydantic for robust data validation
+
+-   **Connection Pooling & Session Management**: Features an intelligent request session factory that implements:
+    -   **Singleton Pattern**: Ensures a single shared session instance across your application, preventing resource waste
+    -   **Connection Pooling**: Automatically reuses TCP connections for multiple requests to the same host, significantly reducing latency and overhead
+    -   **Resource Efficiency**: Eliminates the overhead of creating/destroying sessions for each request, improving performance in high-throughput scenarios
+    -   **Configurable Timeouts**: Flexible timeout configuration with sensible defaults
+    -   **Automatic Cleanup**: Proper session lifecycle management with graceful cleanup methods
 
 ### From Source
 
