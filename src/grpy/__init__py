@@ -1,0 +1,3 @@
+"""GRPY Request Client - A package for making HTTP requests."""
+
+__version__ = "0.1.0"
