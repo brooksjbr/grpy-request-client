@@ -5,7 +5,7 @@ requires = ["hatchling>=0.22", "hatch-vcs>=0.2"]
 
 [project]
 name = "grpy_request_client"
-version = "0.1.0"
+version = "0.2.0"
 description = "A package for making HTTP requests."
 readme = "README.md"
 license = "MIT"
@@ -24,7 +24,8 @@ dependencies = [
     "aiohttp >= 3.8.1",
     "asyncio >= 3.4.3",
     "pydantic>=2.0.0",
-    "pydantic-settings>=2.8.1"
+    "pydantic-settings>=2.8.1",
+    "build"
 ]
 
 [project.urls]
@@ -89,7 +90,7 @@ version_source = "commit"
 branch = "main"
 upload_to_pypi = false
 upload_to_release = false
-build_command = "python -m build"
+build_command = ""
 commit_version_number = true
 commit_message = "chore(release): {version} [skip ci]"
 tag_format = "v{version}"
