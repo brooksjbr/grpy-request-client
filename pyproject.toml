@@ -97,6 +97,8 @@ version_variables = [
     "src/grpy/__init__.py:__version__",
     "pyproject.toml:version"
 ]
+github_release = false
+github_token = false
 
 
 [tool.semantic_release.branches.main]
