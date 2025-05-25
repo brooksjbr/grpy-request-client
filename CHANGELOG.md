@@ -2,7 +2,34 @@
 
 
 
+## v0.4.0 (2025-05-25)
+
+### Feature
+
+* feat: request logger ([`3bd4549`](https://github.com/brooksjbr/grpy-request-client/commit/3bd45495c91e6c30e79707aec7c56596f6bdf50a))
+
+### Fix
+
+* fix: lint error ([`a3c0c25`](https://github.com/brooksjbr/grpy-request-client/commit/a3c0c25069eb5feb323c78597562ad4322afe205))
+
+### Unknown
+
+* Merge pull request #7 from brooksjbr/feat-logger
+
+feat: request logger ([`d33c3aa`](https://github.com/brooksjbr/grpy-request-client/commit/d33c3aa7ea474120e262a2becf8b79814d546362))
+
+* Merge pull request #6 from brooksjbr/brooksjbr-patch-1
+
+doc: update README ([`4245d83`](https://github.com/brooksjbr/grpy-request-client/commit/4245d8363f9da1967d618c26874a190776db7f75))
+
+* doc: update README ([`c266bdd`](https://github.com/brooksjbr/grpy-request-client/commit/c266bddbda04a05860149ea99274196716463266))
+
+
 ## v0.3.0 (2025-05-24)
+
+### Chore
+
+* chore(release): 0.3.0 [skip ci] ([`b6d6fd4`](https://github.com/brooksjbr/grpy-request-client/commit/b6d6fd40262a6758d5ae5359bdd3322a08434da4))
 
 ### Feature
 
