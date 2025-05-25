@@ -6,6 +6,13 @@
 A Python package for making asynchronous HTTP requests.
 
 ## Features
+-   **Robust Error Handling**:
+    -   Status code management
+    -   Context-aware error reporting
+    -   
+-   **Resource Management**:
+    -   Proper session lifecycle management with AsyncExitStack
+    -   Automatic cleanup of resources
 
 -   **Async-First Design**: Built on aiohttp for efficient asynchronous requests, optimized for high-throughput microservices
 
@@ -17,6 +24,18 @@ A Python package for making asynchronous HTTP requests.
     -   **Resource Efficiency**: Eliminates the overhead of creating/destroying sessions for each request, improving performance in high-throughput scenarios
     -   **Configurable Timeouts**: Flexible timeout configuration with sensible defaults
     -   **Automatic Cleanup**: Proper session lifecycle management with graceful cleanup methods
+
+## Error Handling
+
+The `RequestHandler` class automatically handles HTTP error responses by raising appropriate exceptions:
+
+### Error Types
+
+-   **Client Errors (4xx)**: When the API returns a 4xx status code (like 400 Bad Request, 404 Not Found), a `ClientResponseError` is raised with the status code and reason.
+-   **Server Errors (5xx)**: When the API returns a 5xx status code (like 500 Internal Server Error), a `ClientResponseError` is raised with the status code and reason.
+-   **Connection Errors**: Network issues result in `aiohttp.ClientConnectionError` exceptions.
+-   **Timeouts**: Request timeouts result in `asyncio.TimeoutError` exceptions.
+
 
 ### From Source
 
