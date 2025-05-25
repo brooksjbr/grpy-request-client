@@ -11,6 +11,7 @@ from aiohttp import (
 )
 
 from grpy.models.request_model import RequestModel
+from grpy.utils.logger import ComponentLogger, Logger, LoggerProtocol
 
 
 class RequestHandler(AsyncContextManager["RequestHandler"]):
@@ -31,18 +32,35 @@ class RequestHandler(AsyncContextManager["RequestHandler"]):
 
     requestData: RequestModel
     session: ClientSession
+    logger: LoggerProtocol
     _exit_stack: Optional[AsyncExitStack] = None
 
-    def __init__(self, requestData: RequestModel, session: ClientSession) -> None:
+    def __init__(
+        self,
+        requestData: RequestModel,
+        session: ClientSession,
+        logger: Optional[LoggerProtocol] = None,
+    ) -> None:
         """
         Initialize the HTTP request with request data and a session.
 
         Args:
-            requestData: The RestClientModel containing request configuration
+            requestData: The RequestModel containing request configuration
             session: ClientSession to use for requests
+            logger: Optional logger instance. If not provided, a default Logger will be created
         """
         self.requestData = requestData
         self.session = session
+
+        # Create component-aware logger
+        if logger is None:
+            base_logger = Logger()
+            self.logger = base_logger.get_component_logger("RequestHandler")
+        elif isinstance(logger, Logger):
+            self.logger = logger.get_component_logger("RequestHandler")
+        else:
+            # Fallback for loggers that don't support get_component_logger
+            self.logger = ComponentLogger(logger, "RequestHandler")
 
     async def __aenter__(self):
         """
@@ -56,6 +74,7 @@ class RequestHandler(AsyncContextManager["RequestHandler"]):
         self._exit_stack = AsyncExitStack()
         # Mark this as an external session so we don't close it
         self.session._external = True
+        self.logger.debug("Entering RequestHandler context manager")
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -70,6 +89,7 @@ class RequestHandler(AsyncContextManager["RequestHandler"]):
                 await self._exit_stack.aclose()
         finally:
             self._exit_stack = None
+            self.logger.debug("Exiting RequestHandler context manager")
 
     async def execute_request(self):
         """
@@ -106,14 +126,25 @@ class RequestHandler(AsyncContextManager["RequestHandler"]):
         if self.requestData.data is not None:
             kwargs["json"] = self.requestData.data
 
+        self.logger.info(
+            f"Executing {self.requestData.method} request",
+            url=url,
+            endpoint=self.requestData.endpoint,
+        )
+
         try:
             # Execute the request
             response = await self.session.request(method=self.requestData.method, url=url, **kwargs)
+
+            self.logger.info(
+                "Received response", status=response.status, reason=response.reason, url=url
+            )
 
             # Check for error status codes
             if response.status == 401:
                 # Authentication error (Unauthorized)
                 error_message = f"Authentication failed: {response.status} {response.reason}"
+                self.logger.error(error_message, status=response.status, url=url)
                 raise ClientResponseError(
                     request_info=response.request_info,
                     history=response.history,
@@ -123,7 +154,9 @@ class RequestHandler(AsyncContextManager["RequestHandler"]):
                 )
             elif response.status == 403:
                 # Authorization error (Forbidden)
+
                 error_message = f"Authorization failed: {response.status} {response.reason}"
+                self.logger.error(error_message, status=response.status, url=url)
                 raise ClientResponseError(
                     request_info=response.request_info,
                     history=response.history,
@@ -133,34 +166,44 @@ class RequestHandler(AsyncContextManager["RequestHandler"]):
                 )
             elif 400 <= response.status < 500:
                 # Other client errors (4xx)
+                error_message = f"{response.status} {response.reason}"
+                self.logger.warning(
+                    f"Client error: {error_message}", status=response.status, url=url
+                )
                 raise ClientResponseError(
                     request_info=response.request_info,
                     history=response.history,
                     status=response.status,
-                    message=f"{response.status} {response.reason}",
+                    message=error_message,
                     headers=response.headers,
                 )
             elif 500 <= response.status < 600:
                 # Server error (5xx)
+                error_message = f"{response.status} {response.reason}"
+                self.logger.error(f"Server error: {error_message}", status=response.status, url=url)
                 raise ClientResponseError(
                     request_info=response.request_info,
                     history=response.history,
                     status=response.status,
-                    message=f"{response.status} {response.reason}",
+                    message=error_message,
                     headers=response.headers,
                 )
-
+            self.logger.info("Request completed successfully", status=response.status, url=url)
             return response
 
         except ClientConnectorSSLError as e:
             # SSL certificate validation errors
+            self.logger.error(f"SSL certificate validation error: {str(e)}", url=url)
             raise e
         except ClientConnectionError as e:
             # Network connection issues (DNS failures, connection refused, etc.)
+            self.logger.error(f"Connection error: {str(e)}", url=url)
             raise e
         except TimeoutError as e:
             # Request timeout
+            self.logger.error(f"Request timeout: {str(e)}", url=url)
             raise e
         except Exception as e:
             # Catch-all for any other exceptions
+            self.logger.critical(f"Unexpected error during request: {str(e)}", url=url)
             raise e
