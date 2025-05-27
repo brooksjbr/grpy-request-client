@@ -10,8 +10,8 @@ from aiohttp import (
     ClientSession,
 )
 
-from grpy.models.request_model import RequestModel
-from grpy.utils.logger import ComponentLogger, Logger, LoggerProtocol
+from request.models.request_model import RequestModel
+from request.utils.logger import ComponentLogger, Logger, LoggerProtocol
 
 
 class RequestHandler(AsyncContextManager["RequestHandler"]):
@@ -154,7 +154,6 @@ class RequestHandler(AsyncContextManager["RequestHandler"]):
                 )
             elif response.status == 403:
                 # Authorization error (Forbidden)
-
                 error_message = f"Authorization failed: {response.status} {response.reason}"
                 self.logger.error(error_message, status=response.status, url=url)
                 raise ClientResponseError(

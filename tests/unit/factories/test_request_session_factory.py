@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from aiohttp import ClientSession
 
-from grpy.factories.request_session_factory import RequestSessionFactory
+from request.factories.request_session_factory import RequestSessionFactory
 
 
 class TestRequestSessionFactory:
@@ -29,9 +29,9 @@ class TestRequestSessionFactory:
     async def test_create_session(self):
         """Test creating a new session with default parameters."""
         with (
-            patch("grpy.factories.request_session_factory.ClientSession") as mock_session,
-            patch("grpy.factories.request_session_factory.TCPConnector") as mock_connector,
-            patch("grpy.factories.request_session_factory.ClientTimeout") as mock_timeout,
+            patch("request.factories.request_session_factory.ClientSession") as mock_session,
+            patch("request.factories.request_session_factory.TCPConnector") as mock_connector,
+            patch("request.factories.request_session_factory.ClientTimeout") as mock_timeout,
         ):
             # Setup mocks
             mock_session_instance = MagicMock(spec=ClientSession)
@@ -50,9 +50,9 @@ class TestRequestSessionFactory:
     async def test_create_session_with_custom_timeout(self):
         """Test creating a session with custom timeout."""
         with (
-            patch("grpy.factories.request_session_factory.ClientSession") as mock_session,
-            patch("grpy.factories.request_session_factory.TCPConnector") as mock_connector,
-            patch("grpy.factories.request_session_factory.ClientTimeout") as mock_timeout,
+            patch("request.factories.request_session_factory.ClientSession") as mock_session,
+            patch("request.factories.request_session_factory.TCPConnector") as mock_connector,
+            patch("request.factories.request_session_factory.ClientTimeout") as mock_timeout,
         ):
             # Setup mocks
             mock_session_instance = MagicMock(spec=ClientSession)
@@ -71,9 +71,9 @@ class TestRequestSessionFactory:
     async def test_create_session_with_connector_options(self):
         """Test creating a session with custom connector options."""
         with (
-            patch("grpy.factories.request_session_factory.ClientSession") as mock_session,
-            patch("grpy.factories.request_session_factory.TCPConnector") as mock_connector,
-            patch("grpy.factories.request_session_factory.ClientTimeout") as mock_timeout,
+            patch("request.factories.request_session_factory.ClientSession") as mock_session,
+            patch("request.factories.request_session_factory.TCPConnector") as mock_connector,
+            patch("request.factories.request_session_factory.ClientTimeout") as mock_timeout,
         ):
             # Setup mocks
             mock_session_instance = MagicMock(spec=ClientSession)
