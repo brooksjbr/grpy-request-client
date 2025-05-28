@@ -6,7 +6,7 @@ from request.models.request_model import RequestModel
 class TestRestClientInitialization:
     def test_init_with_defaults(self, base_url):
         client = RequestModel(base_url=base_url)
-        assert client.base_url == base_url
+        assert str(client.base_url) == base_url
         assert client.method == "GET"
         assert client.endpoint == ""
         assert client.timeout == 30
@@ -26,7 +26,7 @@ class TestRestClientInitialization:
             headers=custom_headers,
         )
 
-        assert client.base_url == base_url
+        assert str(client.base_url) == base_url
         assert client.method == "POST"
         assert client.endpoint == endpoint
         assert client.timeout == 30

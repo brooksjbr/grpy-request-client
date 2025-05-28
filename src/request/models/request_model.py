@@ -1,6 +1,6 @@
 from typing import Any, ClassVar, Dict, Optional, Set
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, HttpUrl
 
 from .. import __version__
 
@@ -26,7 +26,7 @@ class RequestModel(BaseModel):
         "User-Agent": DEFAULT_USER_AGENT,
     }
 
-    base_url: str = Field()
+    base_url: HttpUrl = Field()
     method: str = Field(default="GET")
     endpoint: str = Field(default="")
     timeout: float = Field(default=30, gt=0)
