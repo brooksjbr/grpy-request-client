@@ -8,12 +8,12 @@ from request.models.request_model import RequestModel
 
 @pytest.fixture
 def base_url():
-    return "https://api.example.com"
+    return "https://api.example.com/"
 
 
 @pytest.fixture
 def endpoint():
-    return "/v1/resource"
+    return "v1/resource"
 
 
 @pytest.fixture

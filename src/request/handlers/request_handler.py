@@ -113,7 +113,8 @@ class RequestHandler(AsyncContextManager["RequestHandler"]):
             asyncio.TimeoutError: When the request times out
             Exception: Any other exceptions that occur during the request
         """
-        url = urljoin(self.requestData.base_url, self.requestData.endpoint)
+
+        url = urljoin(str(self.requestData.base_url), self.requestData.endpoint)
 
         # Prepare request kwargs
         kwargs = {

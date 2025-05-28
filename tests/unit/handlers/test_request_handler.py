@@ -74,7 +74,7 @@ class TestRequestHandler:
         # Verify the session's request method was called with the correct arguments
         mock_session.request.assert_called_once_with(
             method=request_data.method,
-            url=f"{request_data.base_url}{request_data.endpoint}",
+            url=str(request_data.base_url) + request_data.endpoint,
             params=request_data.params,
             headers=request_data.headers,
             timeout=request_data.timeout,
