@@ -47,6 +47,15 @@ dev = [
     "build",
 ]
 
+test = [
+    "pytest >= 6.1.1",
+    "pytest-cov >= 4.1.0",
+    "pytest-asyncio",
+    "pytest-tornasync >= 0.6.0.post2",
+    "pytest-trio >= 0.8.0",
+    "pytest-twisted >= 1.14.3"
+]
+
 [tool.hatch.build]
 include = [
     "src",
