@@ -1,8 +1,8 @@
 from aiohttp import ClientSession, ClientTimeout, TCPConnector
 
 
-class RequestSessionFactory:
-    """Factory class for creating and managing ClientSession instances."""
+class SessionManager:
+    """Manager class for creating and managing ClientSession instances."""
 
     # Singleton instance
     _instance = None
@@ -11,7 +11,7 @@ class RequestSessionFactory:
     def __new__(cls):
         """Implement singleton pattern."""
         if cls._instance is None:
-            cls._instance = super(RequestSessionFactory, cls).__new__(cls)
+            cls._instance = super(SessionManager, cls).__new__(cls)
         return cls._instance
 
     @classmethod

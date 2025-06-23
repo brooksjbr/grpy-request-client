@@ -3,24 +3,24 @@ from unittest.mock import MagicMock, patch
 import pytest
 from aiohttp import ClientSession
 
-from src.grpy_request_client.factories.request_session_factory import RequestSessionFactory
+from src.grpy_request_client.managers.session_manager import SessionManager
 
 
-class TestRequestSessionFactory:
-    """Tests for the RequestSessionFactory class."""
+class TestSessionManager:
+    """Tests for the SessionManager class."""
 
     @pytest.fixture(autouse=True)
     async def cleanup(self):
         """Clean up any sessions after each test."""
         yield
-        await RequestSessionFactory.close_session()
+        await SessionManager.close_session()
         # Reset the singleton state
-        RequestSessionFactory._session = None
+        SessionManager._session = None
 
     def test_singleton_pattern(self):
-        """Test that RequestSessionFactory implements the singleton pattern."""
-        factory1 = RequestSessionFactory()
-        factory2 = RequestSessionFactory()
+        """Test that SessionManager implements the singleton pattern."""
+        factory1 = SessionManager()
+        factory2 = SessionManager()
 
         # Both instances should be the same object
         assert factory1 is factory2
@@ -29,22 +29,18 @@ class TestRequestSessionFactory:
     async def test_create_session(self):
         """Test creating a new session with default parameters."""
         with (
+            patch("src.grpy_request_client.managers.session_manager.ClientSession") as mock_session,
             patch(
-                "src.grpy_request_client.factories.request_session_factory.ClientSession"
-            ) as mock_session,
-            patch(
-                "src.grpy_request_client.factories.request_session_factory.TCPConnector"
+                "src.grpy_request_client.managers.session_manager.TCPConnector"
             ) as mock_connector,
-            patch(
-                "src.grpy_request_client.factories.request_session_factory.ClientTimeout"
-            ) as mock_timeout,
+            patch("src.grpy_request_client.managers.session_manager.ClientTimeout") as mock_timeout,
         ):
             # Setup mocks
             mock_session_instance = MagicMock(spec=ClientSession)
             mock_session.return_value = mock_session_instance
 
             # Call the method
-            session = RequestSessionFactory.create_session()
+            session = SessionManager.create_session()
 
             # Verify session was created with expected parameters
             mock_connector.assert_called_once_with()
@@ -56,22 +52,18 @@ class TestRequestSessionFactory:
     async def test_create_session_with_custom_timeout(self):
         """Test creating a session with custom timeout."""
         with (
+            patch("src.grpy_request_client.managers.session_manager.ClientSession") as mock_session,
             patch(
-                "src.grpy_request_client.factories.request_session_factory.ClientSession"
-            ) as mock_session,
-            patch(
-                "src.grpy_request_client.factories.request_session_factory.TCPConnector"
+                "src.grpy_request_client.managers.session_manager.TCPConnector"
             ) as mock_connector,
-            patch(
-                "src.grpy_request_client.factories.request_session_factory.ClientTimeout"
-            ) as mock_timeout,
+            patch("src.grpy_request_client.managers.session_manager.ClientTimeout") as mock_timeout,
         ):
             # Setup mocks
             mock_session_instance = MagicMock(spec=ClientSession)
             mock_session.return_value = mock_session_instance
 
             # Call the method with custom timeout
-            session = RequestSessionFactory.create_session(timeout=60)
+            session = SessionManager.create_session(timeout=60)
 
             # Verify timeout was created with expected value
             mock_connector.assert_called_once_with()
@@ -83,15 +75,11 @@ class TestRequestSessionFactory:
     async def test_create_session_with_connector_options(self):
         """Test creating a session with custom connector options."""
         with (
+            patch("src.grpy_request_client.managers.session_manager.ClientSession") as mock_session,
             patch(
-                "src.grpy_request_client.factories.request_session_factory.ClientSession"
-            ) as mock_session,
-            patch(
-                "src.grpy_request_client.factories.request_session_factory.TCPConnector"
+                "src.grpy_request_client.managers.session_manager.TCPConnector"
             ) as mock_connector,
-            patch(
-                "src.grpy_request_client.factories.request_session_factory.ClientTimeout"
-            ) as mock_timeout,
+            patch("src.grpy_request_client.managers.session_manager.ClientTimeout") as mock_timeout,
         ):
             # Setup mocks
             mock_session_instance = MagicMock(spec=ClientSession)
@@ -99,7 +87,7 @@ class TestRequestSessionFactory:
 
             # Call the method with connector options
             connector_options = {"limit": 20, "ssl": False}
-            session = RequestSessionFactory.create_session(connector_options=connector_options)
+            session = SessionManager.create_session(connector_options=connector_options)
 
             # Verify connector was created with expected options
             mock_connector.assert_called_once_with(**connector_options)
@@ -111,20 +99,20 @@ class TestRequestSessionFactory:
     async def test_get_session_creates_new_if_none_exists(self):
         """Test that get_session creates a new session if none exists."""
         # Reset the singleton state
-        RequestSessionFactory._session = None
+        SessionManager._session = None
 
-        with patch.object(RequestSessionFactory, "create_session") as mock_create:
+        with patch.object(SessionManager, "create_session") as mock_create:
             mock_session = MagicMock(spec=ClientSession)
             mock_session.closed = False
             mock_create.return_value = mock_session
 
             # Call get_session
-            session = RequestSessionFactory.get_session()
+            session = SessionManager.get_session()
 
             # Verify create_session was called and returned session is correct
             mock_create.assert_called_once()
             assert session == mock_session
-            assert RequestSessionFactory._session == mock_session
+            assert SessionManager._session == mock_session
 
     @pytest.mark.asyncio
     async def test_get_session_returns_existing_session(self):
@@ -132,11 +120,11 @@ class TestRequestSessionFactory:
         # Setup existing session
         mock_session = MagicMock(spec=ClientSession)
         mock_session.closed = False
-        RequestSessionFactory._session = mock_session
+        SessionManager._session = mock_session
 
-        with patch.object(RequestSessionFactory, "create_session") as mock_create:
+        with patch.object(SessionManager, "create_session") as mock_create:
             # Call get_session
-            session = RequestSessionFactory.get_session()
+            session = SessionManager.get_session()
 
             # Verify create_session was not called and existing session is returned
             mock_create.assert_not_called()
@@ -148,20 +136,20 @@ class TestRequestSessionFactory:
         # Setup closed session
         mock_closed_session = MagicMock(spec=ClientSession)
         mock_closed_session.closed = True
-        RequestSessionFactory._session = mock_closed_session
+        SessionManager._session = mock_closed_session
 
-        with patch.object(RequestSessionFactory, "create_session") as mock_create:
+        with patch.object(SessionManager, "create_session") as mock_create:
             mock_new_session = MagicMock(spec=ClientSession)
             mock_new_session.closed = False
             mock_create.return_value = mock_new_session
 
             # Call get_session
-            session = RequestSessionFactory.get_session()
+            session = SessionManager.get_session()
 
             # Verify create_session was called and new session is returned
             mock_create.assert_called_once()
             assert session == mock_new_session
-            assert RequestSessionFactory._session == mock_new_session
+            assert SessionManager._session == mock_new_session
 
     @pytest.mark.asyncio
     async def test_close_session(self):
@@ -169,20 +157,20 @@ class TestRequestSessionFactory:
         # Setup mock session
         mock_session = MagicMock(spec=ClientSession)
         mock_session.closed = False
-        RequestSessionFactory._session = mock_session
+        SessionManager._session = mock_session
 
         # Call close_session
-        await RequestSessionFactory.close_session()
+        await SessionManager.close_session()
 
         # Verify session was closed
         mock_session.close.assert_called_once()
-        assert RequestSessionFactory._session is None
+        assert SessionManager._session is None
 
     @pytest.mark.asyncio
     async def test_close_session_with_no_session(self):
         """Test closing when no session exists."""
         # Ensure no session exists
-        RequestSessionFactory._session = None
+        SessionManager._session = None
 
         # This should not raise any errors
-        await RequestSessionFactory.close_session()
+        await SessionManager.close_session()
