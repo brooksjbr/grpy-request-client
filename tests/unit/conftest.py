@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 import pytest
 from aiohttp import ClientResponse, ClientSession
 
-from request.models.request_model import RequestModel
+from src.grpy_request_client.models.request_model import RequestModel
 
 
 @pytest.fixture

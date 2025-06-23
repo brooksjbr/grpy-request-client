@@ -64,7 +64,7 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.wheel]
-only-include = ["src"]
+only-include = ["src/grpy_request_client"]
 sources = ["src"]
 
 [tool.black]

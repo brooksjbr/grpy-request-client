@@ -9,7 +9,7 @@ from aiohttp import (
     ServerDisconnectedError,
 )
 
-from request.handlers.request_handler import RequestHandler
+from src.grpy_request_client.handlers.request_handler import RequestHandler
 
 
 class TestRequestHandler:

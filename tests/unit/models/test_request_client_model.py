@@ -1,6 +1,6 @@
 import pytest
 
-from request.models.request_model import RequestModel
+from src.grpy_request_client.models.request_model import RequestModel
 
 
 class TestRestClientInitialization:
