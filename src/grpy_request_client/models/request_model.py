@@ -1,6 +1,6 @@
 from typing import Any, ClassVar, Dict, Optional, Set
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
 from .. import __version__
 

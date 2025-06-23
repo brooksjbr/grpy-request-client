@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from request.utils.logger import ComponentLogger, Logger, LoggerProtocol
+from src.grpy_request_client.utils.logger import ComponentLogger, Logger, LoggerProtocol
 
 
 class TestLoggerProtocol:
