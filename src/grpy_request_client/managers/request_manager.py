@@ -14,7 +14,7 @@ from src.grpy_request_client.models.request_model import RequestModel
 from src.grpy_request_client.utils.logger import ComponentLogger, Logger, LoggerProtocol
 
 
-class RequestHandler(AsyncContextManager["RequestHandler"]):
+class RequestManager(AsyncContextManager["RequestManager"]):
     """
     HTTP Request class that handles request data and acts as an async context manager.
 
@@ -55,12 +55,12 @@ class RequestHandler(AsyncContextManager["RequestHandler"]):
         # Create component-aware logger
         if logger is None:
             base_logger = Logger()
-            self.logger = base_logger.get_component_logger("RequestHandler")
+            self.logger = base_logger.get_component_logger("RequestManager")
         elif isinstance(logger, Logger):
-            self.logger = logger.get_component_logger("RequestHandler")
+            self.logger = logger.get_component_logger("RequestManager")
         else:
             # Fallback for loggers that don't support get_component_logger
-            self.logger = ComponentLogger(logger, "RequestHandler")
+            self.logger = ComponentLogger(logger, "RequestManager")
 
     async def __aenter__(self):
         """
@@ -74,7 +74,7 @@ class RequestHandler(AsyncContextManager["RequestHandler"]):
         self._exit_stack = AsyncExitStack()
         # Mark this as an external session so we don't close it
         self.session._external = True
-        self.logger.debug("Entering RequestHandler context manager")
+        self.logger.debug("Entering RequestManager context manager")
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -89,7 +89,7 @@ class RequestHandler(AsyncContextManager["RequestHandler"]):
                 await self._exit_stack.aclose()
         finally:
             self._exit_stack = None
-            self.logger.debug("Exiting RequestHandler context manager")
+            self.logger.debug("Exiting RequestManager context manager")
 
     async def execute_request(self):
         """

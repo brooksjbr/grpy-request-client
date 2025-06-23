@@ -9,16 +9,16 @@ from aiohttp import (
     ServerDisconnectedError,
 )
 
-from src.grpy_request_client.handlers.request_handler import RequestHandler
+from src.grpy_request_client.managers.request_manager import RequestManager
 
 
-class TestRequestHandler:
+class TestRequestManager:
     """Tests for the RequestHandler class."""
 
     def test_init(self, request_data, mock_session):
         """Test initialization of RequestHandler with RestClientModel."""
         # Initialize RequestHandler with the mock
-        http_request = RequestHandler(requestData=request_data, session=mock_session)
+        http_request = RequestManager(requestData=request_data, session=mock_session)
 
         # Verify the request data was properly set
         assert http_request.requestData == request_data
@@ -28,7 +28,7 @@ class TestRequestHandler:
     def test_init_with_session(self, request_data, mock_session):
         """Test initialization of RequestHandler with RestClientModel and a session."""
         # Initialize RequestHandler with the mock request data and session
-        http_request = RequestHandler(requestData=request_data, session=mock_session)
+        http_request = RequestManager(requestData=request_data, session=mock_session)
 
         # Verify the request data and session were properly set
         assert http_request.requestData == request_data
@@ -38,20 +38,20 @@ class TestRequestHandler:
     async def test_async_context_manager(self, request_data, mock_session):
         """Test that RequestHandler works as an async context manager."""
         # Use RequestHandler as an async context manager
-        async with RequestHandler(requestData=request_data, session=mock_session) as http_request:
+        async with RequestManager(requestData=request_data, session=mock_session) as http_request:
             # Verify the instance is returned by __aenter__
-            assert isinstance(http_request, RequestHandler)
+            assert isinstance(http_request, RequestManager)
             assert http_request.requestData == request_data
             # Verify session is properly set
             assert http_request.session == mock_session
 
     @pytest.mark.asyncio
     async def test_async_context_manager_with_session(self, request_data, mock_session):
-        """Test that RequestHandler works as an async context manager with a session."""
-        # Use RequestHandler as an async context manager with a session
-        async with RequestHandler(requestData=request_data, session=mock_session) as http_request:
+        """Test that RequestManager works as an async context manager with a session."""
+        # Use RequestManager as an async context manager with a session
+        async with RequestManager(requestData=request_data, session=mock_session) as http_request:
             # Verify the instance is returned by __aenter__
-            assert isinstance(http_request, RequestHandler)
+            assert isinstance(http_request, RequestManager)
             assert http_request.requestData == request_data
             # Verify the session is properly set
             assert http_request.session == mock_session
@@ -62,8 +62,8 @@ class TestRequestHandler:
         # Create a mock session with a 200 OK response
         mock_session, mock_response = mock_session_factory(status=200)
 
-        # Create the RequestHandler instance
-        http_request = RequestHandler(requestData=request_data, session=mock_session)
+        # Create the RequestManager instance
+        http_request = RequestManager(requestData=request_data, session=mock_session)
 
         # Execute the request
         response = await http_request.execute_request()
@@ -104,8 +104,8 @@ class TestRequestHandler:
         # Create a mock session with the specified error response
         mock_session, _ = mock_session_factory(status=status_code, reason=reason)
 
-        # Create the RequestHandler instance
-        http_request = RequestHandler(requestData=request_data, session=mock_session)
+        # Create the RequestManager instance
+        http_request = RequestManager(requestData=request_data, session=mock_session)
 
         # Execute the request and expect a ClientResponseError
         with pytest.raises(ClientResponseError) as excinfo:
@@ -139,8 +139,8 @@ class TestRequestHandler:
         exception = exception_class(*exception_args)
         mock_session.request = AsyncMock(side_effect=exception)
 
-        # Create the RequestHandler instance
-        http_request = RequestHandler(requestData=request_data, session=mock_session)
+        # Create the RequestManager instance
+        http_request = RequestManager(requestData=request_data, session=mock_session)
 
         # Execute the request and expect the appropriate exception
         with pytest.raises(expected_exception_type):
@@ -161,8 +161,8 @@ class TestRequestHandler:
         # Configure the mock session to raise a general exception
         mock_session.request = AsyncMock(side_effect=Exception("Unexpected error"))
 
-        # Create the RequestHandler instance
-        http_request = RequestHandler(requestData=request_data, session=mock_session)
+        # Create the RequestManager instance
+        http_request = RequestManager(requestData=request_data, session=mock_session)
 
         # Execute the request and expect the exception to be re-raised
         with pytest.raises(Exception) as excinfo:
@@ -186,8 +186,8 @@ class TestRequestHandler:
         # Create a mock session with the specified error response
         mock_session, mock_response = mock_session_factory(status=status_code, reason=reason)
 
-        # Create the RequestHandler instance
-        http_request = RequestHandler(requestData=request_data, session=mock_session)
+        # Create the RequestManager instance
+        http_request = RequestManager(requestData=request_data, session=mock_session)
 
         # Execute the request and expect a ClientResponseError
         with pytest.raises(ClientResponseError) as excinfo:
