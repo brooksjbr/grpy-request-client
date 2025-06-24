@@ -22,6 +22,36 @@ def request_data(base_url):
 
 
 @pytest.fixture
+def valid_request_data(base_url):
+    """Fixture providing valid request data for factory tests."""
+    return {
+        "base_url": base_url.rstrip('/'),  # Remove trailing slash for consistency
+        "endpoints": {"users": {"get": "/users"}},
+        "method": "GET",
+        "endpoint": "/users",
+        "timeout": 30.0
+    }
+
+
+@pytest.fixture
+def minimal_request_data(base_url):
+    """Fixture providing minimal valid request data."""
+    return {
+        "base_url": base_url.rstrip('/'),
+        "endpoints": {}
+    }
+
+
+@pytest.fixture
+def invalid_request_data():
+    """Fixture providing invalid request data."""
+    return {
+        "base_url": "invalid-url",
+        "endpoints": {}
+    }
+
+
+@pytest.fixture
 def mock_client_session():
     def _create_session(response=None, side_effect=None):
         mock_session = MagicMock(spec=ClientSession)
