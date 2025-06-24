@@ -25,30 +25,24 @@ def request_data(base_url):
 def valid_request_data(base_url):
     """Fixture providing valid request data for factory tests."""
     return {
-        "base_url": base_url.rstrip('/'),  # Remove trailing slash for consistency
+        "base_url": base_url.rstrip("/"),  # Remove trailing slash for consistency
         "endpoints": {"users": {"get": "/users"}},
         "method": "GET",
         "endpoint": "/users",
-        "timeout": 30.0
+        "timeout": 30.0,
     }
 
 
 @pytest.fixture
 def minimal_request_data(base_url):
     """Fixture providing minimal valid request data."""
-    return {
-        "base_url": base_url.rstrip('/'),
-        "endpoints": {}
-    }
+    return {"base_url": base_url.rstrip("/"), "endpoints": {}}
 
 
 @pytest.fixture
 def invalid_request_data():
     """Fixture providing invalid request data."""
-    return {
-        "base_url": "invalid-url",
-        "endpoints": {}
-    }
+    return {"base_url": "invalid-url", "endpoints": {}}
 
 
 @pytest.fixture

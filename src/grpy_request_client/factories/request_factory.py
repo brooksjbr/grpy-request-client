@@ -1,5 +1,6 @@
-from ..models.request_model import RequestModel
+from ..managers.request_manager import RequestManager
 from ..managers.session_manager import SessionManager
+from ..models.request_model import RequestModel
 
 
 class RequestFactory:
@@ -30,3 +31,18 @@ class RequestFactory:
             ClientSession: Configured session instance
         """
         return SessionManager.get_session(**kwargs)
+
+    @staticmethod
+    def create_request_manager(request_data: RequestModel, session, logger=None) -> RequestManager:
+        """
+        Create a RequestManager instance.
+
+        Args:
+            request_data: RequestModel containing request configuration
+            session: ClientSession to use for requests
+            logger: Optional logger instance
+
+        Returns:
+            RequestManager: Configured RequestManager instance
+        """
+        return RequestManager(request_data, session, logger)
