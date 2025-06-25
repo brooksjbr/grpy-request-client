@@ -10,8 +10,8 @@ from aiohttp import (
     ClientSession,
 )
 
-from src.grpy_request_client.models.request_model import RequestModel
-from src.grpy_request_client.utils.logger import ComponentLogger, Logger, LoggerProtocol
+from ..models.request_model import RequestModel
+from ..utils.logger import ComponentLogger, Logger, LoggerProtocol
 
 
 class RequestManager(AsyncContextManager["RequestManager"]):

@@ -3,13 +3,20 @@ import pytest
 from src.grpy_request_client.models.request_model import RequestModel
 
 
+def create_test_request_model(**kwargs):
+    """Helper to create RequestModel with required fields for testing."""
+    defaults = {"endpoints": {"test": {"path": "/test"}}}
+    defaults.update(kwargs)
+    return RequestModel(**defaults)
+
+
 class TestRestClientInitialization:
     def test_init_with_defaults(self, base_url):
-        client = RequestModel(base_url=base_url)
+        client = create_test_request_model(base_url=base_url)
         assert str(client.base_url) == base_url
         assert client.method == "GET"
         assert client.endpoint == ""
-        assert client.timeout == 30
+        assert client.timeout == 5
         assert client.params == {}
         assert client.headers == client.DEFAULT_HEADERS
 
@@ -17,7 +24,7 @@ class TestRestClientInitialization:
         custom_headers = {"X-Custom-Header": "value"}
         custom_params = {"param1": "value1"}
 
-        client = RequestModel(
+        client = create_test_request_model(
             base_url=base_url,
             method="POST",
             endpoint=endpoint,
@@ -41,28 +48,28 @@ class TestRestClientInitialization:
 
 
 class TestRequestModelValidation:
-    def test_validate_http_method_valid(self, base_url):
+    def test_validate_http_method_valid(self, base_url, endpoint):
         for method in RequestModel.VALID_METHODS:
-            client = RequestModel(base_url=base_url, method=method)
+            client = create_test_request_model(base_url=base_url, endpoint=endpoint, method=method)
             assert client.method == method
 
-    def test_validate_http_method_invalid(self, base_url):
+    def test_validate_http_method_invalid(self, base_url, endpoint):
         with pytest.raises(ValueError) as excinfo:
-            RequestModel(base_url=base_url, method="INVALID")
+            create_test_request_model(base_url=base_url, endpoint=endpoint, method="INVALID")
         assert "Invalid HTTP method" in str(excinfo.value)
 
-    def test_validate_timeout_valid(self, base_url):
-        client = RequestModel(base_url=base_url, timeout=10)
+    def test_validate_timeout_valid(self, base_url, endpoint):
+        client = create_test_request_model(base_url=base_url, endpoint=endpoint, timeout=10)
         assert client.timeout == 10
 
-        client = RequestModel(base_url=base_url, timeout=0.5)
+        client = create_test_request_model(base_url=base_url, endpoint=endpoint, timeout=0.5)
         assert client.timeout == 0.5
 
-    def test_validate_timeout_invalid(self, base_url):
+    def test_validate_timeout_invalid(self, base_url, endpoint):
         with pytest.raises(ValueError) as excinfo:
-            RequestModel(base_url=base_url, timeout=0)
+            create_test_request_model(base_url=base_url, endpoint=endpoint, timeout=0)
         assert "Input should be greater than 0" in str(excinfo.value)
 
         with pytest.raises(ValueError):
-            RequestModel(base_url=base_url, timeout=-1)
+            create_test_request_model(base_url=base_url, endpoint=endpoint, timeout=-1)
         assert "Input should be greater than 0" in str(excinfo.value)
