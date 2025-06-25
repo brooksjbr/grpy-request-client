@@ -19,8 +19,7 @@ def endpoint():
 @pytest.fixture
 def request_data(base_url):
     return RequestModel(
-        base_url=base_url,
-        endpoints={"test": {"path": "/test"}}  # Add required endpoints
+        base_url=base_url, endpoints={"test": {"path": "/test"}}  # Add required endpoints
     )
 
 

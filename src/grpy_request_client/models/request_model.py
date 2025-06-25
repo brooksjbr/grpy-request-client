@@ -3,7 +3,6 @@ from typing import Any, ClassVar, Dict, Optional, Set
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
 
-
 class RequestModel(BaseModel):
     """Data model for REST client configuration."""
 
@@ -17,7 +16,7 @@ class RequestModel(BaseModel):
         "HEAD",
     }
 
-    DEFAULT_USER_AGENT: ClassVar[str] = f"grpy-request-client/0.8.0"
+    DEFAULT_USER_AGENT: ClassVar[str] = "grpy-request-client/0.8.0"
 
     DEFAULT_HEADERS: ClassVar[Dict[str, str]] = {
         "Accept": "application/json",

@@ -5,9 +5,7 @@ from src.grpy_request_client.models.request_model import RequestModel
 
 def create_test_request_model(**kwargs):
     """Helper to create RequestModel with required fields for testing."""
-    defaults = {
-        "endpoints": {"test": {"path": "/test"}}
-    }
+    defaults = {"endpoints": {"test": {"path": "/test"}}}
     defaults.update(kwargs)
     return RequestModel(**defaults)
 
