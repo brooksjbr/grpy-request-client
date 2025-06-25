@@ -2,7 +2,6 @@ from typing import Any, ClassVar, Dict, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
-from .. import __version__
 
 
 class RequestModel(BaseModel):
@@ -18,7 +17,7 @@ class RequestModel(BaseModel):
         "HEAD",
     }
 
-    DEFAULT_USER_AGENT: ClassVar[str] = f"grpy-request-client/{__version__}"
+    DEFAULT_USER_AGENT: ClassVar[str] = f"grpy-request-client/0.8.0"
 
     DEFAULT_HEADERS: ClassVar[Dict[str, str]] = {
         "Accept": "application/json",
@@ -26,10 +25,13 @@ class RequestModel(BaseModel):
         "User-Agent": DEFAULT_USER_AGENT,
     }
 
-    base_url: HttpUrl = Field()
+    base_url: HttpUrl = Field(..., description="Base URL for the provider's API")
+    endpoints: Dict[str, Dict[str, str]] = Field(
+        ..., description="Dictionary of API endpoints, keyed by resource name"
+    )
     method: str = Field(default="GET")
     endpoint: str = Field(default="")
-    timeout: float = Field(default=30, gt=0)
+    timeout: float = Field(default=5, gt=0)
     params: Dict[str, str] = Field(default_factory=dict)
     headers: Dict[str, str] = Field(default_factory=dict)
     data: Optional[Dict[str, Any]] = Field(default=None)
