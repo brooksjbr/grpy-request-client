@@ -27,30 +27,34 @@ class RequestManager(AsyncContextManager["RequestManager"]):
     - Executes HTTP requests using aiohttp
     - Automatically raises exceptions for non-2xx responses
     - Supports all standard HTTP methods (GET, POST, PUT, DELETE, PATCH, HEAD)
+    - Can work with or without an external session (creates its own if needed)
 
     """
 
     requestData: RequestModel
-    session: ClientSession
+    session: Optional[ClientSession]
     logger: LoggerProtocol
     _exit_stack: Optional[AsyncExitStack] = None
+    _owns_session: bool = False
 
     def __init__(
         self,
         requestData: RequestModel,
-        session: ClientSession,
+        session: Optional[ClientSession] = None,
         logger: Optional[LoggerProtocol] = None,
     ) -> None:
         """
-        Initialize the HTTP request with request data and a session.
+        Initialize the HTTP request with request data and an optional session.
 
         Args:
             requestData: The RequestModel containing request configuration
-            session: ClientSession to use for requests
+            session: Optional ClientSession to use for requests. If not provided,
+                    a new session will be created when needed.
             logger: Optional logger instance. If not provided, a default Logger will be created
         """
         self.requestData = requestData
         self.session = session
+        self._owns_session = session is None
 
         # Create component-aware logger
         if logger is None:
@@ -66,14 +70,25 @@ class RequestManager(AsyncContextManager["RequestManager"]):
         """
         Enter the async context manager.
 
-        Sets up the exit stack for resource management and marks the session as external.
+        Sets up the exit stack for resource management and creates a session if needed.
 
         Returns:
-            The HttpRequest instance
+            The RequestManager instance
         """
         self._exit_stack = AsyncExitStack()
-        # Mark this as an external session so we don't close it
-        self.session._external = True
+
+        # Create session if we don't have one
+        if self.session is None:
+            self.session = ClientSession()
+            self._owns_session = True
+            # Register the session for cleanup
+            await self._exit_stack.enter_async_context(self.session)
+            self.logger.debug("Created new session for RequestManager")
+        else:
+            # Mark external session so we don't close it
+            self.session._external = True
+            self.logger.debug("Using external session for RequestManager")
+
         self.logger.debug("Entering RequestManager context manager")
         return self
 
@@ -81,15 +96,34 @@ class RequestManager(AsyncContextManager["RequestManager"]):
         """
         Exit the async context manager.
 
-        Cleans up the exit stack but doesn't close the session
-        as it's managed externally.
+        Cleans up the exit stack and closes the session if we own it.
         """
         try:
             if self._exit_stack:
                 await self._exit_stack.aclose()
         finally:
+            # Reset session reference if we owned it
+            if self._owns_session:
+                self.session = None
             self._exit_stack = None
             self.logger.debug("Exiting RequestManager context manager")
+
+    async def _ensure_session(self) -> ClientSession:
+        """
+        Ensure we have a session available for making requests.
+
+        Returns:
+            ClientSession: The session to use for requests
+
+        Raises:
+            RuntimeError: If called outside of context manager when no session is provided
+        """
+        if self.session is None:
+            raise RuntimeError(
+                "No session available. Either provide a session during initialization "
+                "or use RequestManager as an async context manager."
+            )
+        return self.session
 
     async def execute_request(self):
         """
@@ -103,6 +137,7 @@ class RequestManager(AsyncContextManager["RequestManager"]):
             ClientResponse: The response from the HTTP request for successful (2xx) responses
 
         Raises:
+            RuntimeError: If no session is available (not used as context manager and no session provided)
             ClientResponseError: For HTTP error responses, including:
                              - 401 Unauthorized (authentication failures)
                              - 403 Forbidden (authorization failures)
@@ -113,6 +148,8 @@ class RequestManager(AsyncContextManager["RequestManager"]):
             asyncio.TimeoutError: When the request times out
             Exception: Any other exceptions that occur during the request
         """
+        # Ensure we have a session
+        session = await self._ensure_session()
 
         url = urljoin(str(self.requestData.base_url), self.requestData.endpoint)
 
@@ -135,7 +172,7 @@ class RequestManager(AsyncContextManager["RequestManager"]):
 
         try:
             # Execute the request
-            response = await self.session.request(method=self.requestData.method, url=url, **kwargs)
+            response = await session.request(method=self.requestData.method, url=url, **kwargs)
 
             self.logger.info(
                 "Received response", status=response.status, reason=response.reason, url=url
