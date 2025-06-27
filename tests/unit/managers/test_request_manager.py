@@ -6,6 +6,7 @@ from aiohttp import (
     ClientConnectorError,
     ClientConnectorSSLError,
     ClientResponseError,
+    ClientSession,
     ServerDisconnectedError,
 )
 
@@ -13,48 +14,87 @@ from src.grpy_request_client.managers.request_manager import RequestManager
 
 
 class TestRequestManager:
-    """Tests for the RequestHandler class."""
+    """Tests for the RequestManager class."""
 
-    def test_init(self, request_data, mock_session):
-        """Test initialization of RequestHandler with RestClientModel."""
-        # Initialize RequestHandler with the mock
-        http_request = RequestManager(requestData=request_data, session=mock_session)
+    def test_init_without_session(self, request_data):
+        """Test initialization of RequestManager without session."""
+        # Initialize RequestManager without session
+        http_request = RequestManager(requestData=request_data)
 
         # Verify the request data was properly set
         assert http_request.requestData == request_data
-        # Verify session is properly set
-        assert http_request.session == mock_session
+        # Verify session is None and we own the session
+        assert http_request.session is None
+        assert http_request._owns_session is True
 
-    def test_init_with_session(self, request_data, mock_session):
-        """Test initialization of RequestHandler with RestClientModel and a session."""
-        # Initialize RequestHandler with the mock request data and session
-        http_request = RequestManager(requestData=request_data, session=mock_session)
+    def test_init_with_session(self, request_data, mock_client_session):
+        """Test initialization of RequestManager with session."""
+        # Initialize RequestManager with the mock request data and session
+        http_request = RequestManager(requestData=request_data, session=mock_client_session)
 
         # Verify the request data and session were properly set
         assert http_request.requestData == request_data
-        assert http_request.session == mock_session
+        assert http_request.session == mock_client_session
+        assert http_request._owns_session is False
 
     @pytest.mark.asyncio
-    async def test_async_context_manager(self, request_data, mock_session):
-        """Test that RequestHandler works as an async context manager."""
-        # Use RequestHandler as an async context manager
-        async with RequestManager(requestData=request_data, session=mock_session) as http_request:
+    async def test_async_context_manager_without_session(self, request_data):
+        """Test that RequestManager works as an async context manager without session."""
+        # Use RequestManager as an async context manager without session
+        async with RequestManager(requestData=request_data) as http_request:
             # Verify the instance is returned by __aenter__
             assert isinstance(http_request, RequestManager)
             assert http_request.requestData == request_data
-            # Verify session is properly set
-            assert http_request.session == mock_session
+            # Verify session was created
+            assert http_request.session is not None
+            assert isinstance(http_request.session, ClientSession)
+            assert http_request._owns_session is True
+
+        # Verify session is cleaned up after exit
+        assert http_request.session is None
 
     @pytest.mark.asyncio
-    async def test_async_context_manager_with_session(self, request_data, mock_session):
+    async def test_async_context_manager_with_session(self, request_data, mock_client_session):
         """Test that RequestManager works as an async context manager with a session."""
         # Use RequestManager as an async context manager with a session
-        async with RequestManager(requestData=request_data, session=mock_session) as http_request:
+        async with RequestManager(
+            requestData=request_data, session=mock_client_session
+        ) as http_request:
             # Verify the instance is returned by __aenter__
             assert isinstance(http_request, RequestManager)
             assert http_request.requestData == request_data
             # Verify the session is properly set
-            assert http_request.session == mock_session
+            assert http_request.session == mock_client_session
+            assert http_request._owns_session is False
+
+        # External session should still be available
+        assert http_request.session == mock_client_session
+
+    @pytest.mark.asyncio
+    async def test_ensure_session_without_session_raises_error(self, request_data):
+        """Test that _ensure_session raises error when no session is available."""
+        http_request = RequestManager(requestData=request_data)
+
+        with pytest.raises(RuntimeError, match="No session available"):
+            await http_request._ensure_session()
+
+    @pytest.mark.asyncio
+    async def test_ensure_session_with_session_returns_session(
+        self, request_data, mock_client_session
+    ):
+        """Test that _ensure_session returns session when available."""
+        http_request = RequestManager(requestData=request_data, session=mock_client_session)
+
+        session = await http_request._ensure_session()
+        assert session == mock_client_session
+
+    @pytest.mark.asyncio
+    async def test_execute_request_without_session_outside_context(self, request_data):
+        """Test executing request without session outside context manager raises error."""
+        http_request = RequestManager(requestData=request_data)
+
+        with pytest.raises(RuntimeError, match="No session available"):
+            await http_request.execute_request()
 
     @pytest.mark.asyncio
     async def test_execute_request_get(self, request_data, mock_session_factory):

@@ -83,6 +83,7 @@ def mock_session():
     The response can be customized by setting session.request.return_value.
     """
     session = Mock(spec=ClientSession)
+    session.closed = False
     session.request = AsyncMock()
     return session
 
@@ -98,6 +99,7 @@ def mock_session_factory(mock_client_response):
     def _create_session(status=200, reason="OK", **response_kwargs):
         mock_response = mock_client_response(status=status, reason=reason, **response_kwargs)
         session = Mock(spec=ClientSession)
+        session.closed = False
         session.request = AsyncMock(return_value=mock_response)
         return session, mock_response
 
