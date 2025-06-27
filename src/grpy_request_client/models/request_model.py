@@ -25,9 +25,6 @@ class RequestModel(BaseModel):
     }
 
     base_url: HttpUrl = Field(..., description="Base URL for the provider's API")
-    endpoints: Dict[str, Dict[str, str]] = Field(
-        ..., description="Dictionary of API endpoints, keyed by resource name"
-    )
     method: str = Field(default="GET")
     endpoint: str = Field(default="")
     timeout: float = Field(default=5, gt=0)

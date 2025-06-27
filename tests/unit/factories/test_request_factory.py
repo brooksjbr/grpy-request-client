@@ -27,7 +27,7 @@ class TestRequestFactory:
         assert isinstance(request, RequestModel)
         assert str(request.base_url) == base_url
         assert request.method == "GET"  # default value
-        assert request.endpoint == ""  # default value
+        assert request.endpoint == "v1/resource"  # default value
 
     def test_create_request_with_invalid_data(self, invalid_request_data):
         """Test creating a RequestModel with invalid data raises error."""

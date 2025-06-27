@@ -17,10 +17,8 @@ def endpoint():
 
 
 @pytest.fixture
-def request_data(base_url):
-    return RequestModel(
-        base_url=base_url, endpoints={"test": {"path": "/test"}}  # Add required endpoints
-    )
+def request_data(base_url, endpoint):
+    return RequestModel(base_url=base_url, endpoint=endpoint)  # Add required endpoint
 
 
 @pytest.fixture
@@ -28,7 +26,6 @@ def valid_request_data(base_url):
     """Fixture providing valid request data for factory tests."""
     return {
         "base_url": base_url.rstrip("/"),  # Remove trailing slash for consistency
-        "endpoints": {"users": {"get": "/users"}},
         "method": "GET",
         "endpoint": "/users",
         "timeout": 30.0,
@@ -36,15 +33,15 @@ def valid_request_data(base_url):
 
 
 @pytest.fixture
-def minimal_request_data(base_url):
+def minimal_request_data(base_url, endpoint):
     """Fixture providing minimal valid request data."""
-    return {"base_url": base_url.rstrip("/"), "endpoints": {}}
+    return {"base_url": base_url.rstrip("/"), "endpoint": endpoint}
 
 
 @pytest.fixture
 def invalid_request_data():
     """Fixture providing invalid request data."""
-    return {"base_url": "invalid-url", "endpoints": {}}
+    return {"base_url": "invalid-url", "endpoint": ""}
 
 
 @pytest.fixture
